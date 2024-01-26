@@ -1,5 +1,9 @@
 package com.bitscoder.Authentication_System.service.impl;
 
+import com.bitscoder.Authentication_System.dto.UserInfo;
+import com.bitscoder.Authentication_System.model.User;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.http.ResponseEntity;
 
@@ -15,20 +19,37 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private UserRepository UserRepository;
+    private UserRepository userRepository;
+    private ModelMapper modelMapper;
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public ResponseEntity<Response> signup(Request request) {
         
-        if (UserRepository.findByEmail(request.getEmail()).isPresent()) {
-            return Response.builder()
-                .statusCode(400)
-                .responseMessage(null)
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body(Response.builder()
+                    .statusCode(400)
+                    .responseMessage("Attempt to save duplicate user record")
+                    .build());
+        }
+         else {   User newUser = User.builder()
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .build();
+            User savedUser = userRepository.save(newUser);
+
+            return ResponseEntity.ok(Response.builder()
+                            .statusCode(200)
+                            .responseMessage("SUCCESS")
+                            .userInfo(modelMapper.map(savedUser, UserInfo.class))
+                    .build());
         }
     }
 
     @Override
-    public Response login(LoginRequest loginRequest) {
+    public ResponseEntity<Response> login(LoginRequest loginRequest) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'login'");
     }

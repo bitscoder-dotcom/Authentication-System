@@ -5,12 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequest {
-    
-    private String email;
-    private String password;
+@Data@Builder
+public class EmailDetails {
+
+    private String recipient;
+    private String subject;
+    private String messageBody;
+
 }
